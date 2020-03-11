@@ -9,7 +9,7 @@ const Item = {
     collection: null,
     identification: null,
     title: null,
-    descriptions: [],
+    descriptions: null,
     images: [],
     materials: [],
     measurements: []
@@ -52,17 +52,27 @@ function showSearch(items){
 
     items.forEach(item => {
         const clone = itemTemplate.cloneNode(true).content;
-        if(item.images[0]){
-            clone.querySelector("img").src = `https://frontend.natmus.dk/api/Image?id=${item.images[0]}`;
-            clone.querySelector("img").alt = item.title.toLowerCase();
+        if(item.images && item.images.length !== 0){
+            const img = clone.querySelector("img");
+            img.src = `https://frontend.natmus.dk/api/Image?id=${item.images[0]}`;
+            img.alt = item.title.toLowerCase();
         }
         clone.querySelector(".title").textContent = item.title;
         clone.querySelector(".collection").textContent = item.collection;
         clone.querySelector(".identification").textContent = item.identification;
         clone.querySelector(".listItem").dataset.id = item.id;
-        if(item.descriptions || item.materials || item.measurements){
-            clone.querySelector(".btn").classList.add("d-block");
+        //console.log(item.title, item.descriptions, item.materials, item.measurements);
+        if(item.descriptions && item.descriptions.length !==0 
+        || item.materials && item.materials.length !== 0 
+        || item.measurements && item.measurements.length !== 0){
+            const btn = clone.querySelector(".btn");
+            btn.classList.add("d-block");
+            btn.addEventListener("click", openModal);
         }
         dataList.appendChild(clone);
     })
+}
+
+function openModal(){
+    console.log(this.parentElement.parentElement.dataset.id);
 }
