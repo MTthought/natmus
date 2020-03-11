@@ -1,8 +1,9 @@
 "use strict";
 window.addEventListener("DOMContentLoaded", init);
 
-let userInput = document.querySelector("body > input[type=text]");
-//the prototype for all items, measurements and materials
+const userInput = document.querySelector("input[type=search]");
+const apiBase = "https://frontend.natmus.dk/api/";
+//the prototypes for all items, measurements and materials
 const Item = {
     id: null,
     collection: null,
@@ -29,10 +30,11 @@ function init(){
 }
 
 function search(){
-    const apiBase = "https://frontend.natmus.dk/api/Search";
-    const requestUrl = apiBase + "?query=" + userInput.value;
-    //console.log(requestUrl);
-    getData(requestUrl);
+    if(userInput.value){
+        const requestUrl = `${apiBase}Search?query=${userInput.value}`;
+        //console.log(requestUrl);
+        getData(requestUrl);
+    }
 }
 
 async function getData(api){
@@ -50,9 +52,17 @@ function showSearch(items){
 
     items.forEach(item => {
         const clone = itemTemplate.cloneNode(true).content;
+        if(item.images[0]){
+            clone.querySelector("img").src = `https://frontend.natmus.dk/api/Image?id=${item.images[0]}`;
+            clone.querySelector("img").alt = item.title.toLowerCase();
+        }
         clone.querySelector(".title").textContent = item.title;
         clone.querySelector(".collection").textContent = item.collection;
+        clone.querySelector(".identification").textContent = item.identification;
         clone.querySelector(".listItem").dataset.id = item.id;
+        if(item.descriptions || item.materials || item.measurements){
+            clone.querySelector(".btn").classList.add("d-block");
+        }
         dataList.appendChild(clone);
     })
 }

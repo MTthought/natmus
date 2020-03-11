@@ -3,18 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+    <title>NatMus Assignment</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 <body>
-    <input type="text" value="">
-    <div id="dataList" class="container"></div>
-  
+    <div class="container">
+        <h1 class="pt-4">NatMus Assignment</h1>
+        <form role="search" class="py-4">
+            <input type="search" placeholder="Search..." class="form-control">
+        </form>
+    
+        <div id="dataList" class="row"></div>
+    </div>
+
     <template class="templates">
-      <div class="listItem" data-id="">
-          <div class="title"></div>
-          <div class="collection"></div>
-      </div>
+        <div class="col-md-4 col-lg-3 pb-4">
+            <div class="listItem card" data-id="">
+                <img src="" class="card-img-top" alt="">
+                <div class="card-body">
+                  <h5 class="title card-title"></h5>
+                  <p class="card-text font-weight-light">
+                    <div>Collection: <span class="collection font-weight-normal"></span></div>
+                    <div>Identification: <span class="identification font-weight-normal"></span></div>
+                  </p>
+                  <a href="#" class="btn btn-primary d-none">Show more</a>
+                </div>
+            </div>
+        </div>
     </template>
 
     <script src="script.js"></script>
