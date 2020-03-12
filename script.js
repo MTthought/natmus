@@ -57,15 +57,15 @@ function showSearch(items){
             img.src = `https://frontend.natmus.dk/api/Image?id=${item.images[0]}`;
             img.alt = item.title.toLowerCase();
         }
-        clone.querySelector(".title").textContent = item.title;
+        clone.querySelector(".card-title").textContent = item.title;
         clone.querySelector(".collection").textContent = item.collection;
         clone.querySelector(".identification").textContent = item.identification;
-        clone.querySelector(".listItem").dataset.id = item.id;
         //console.log(item.title, item.descriptions, item.materials, item.measurements);
         if(item.descriptions && item.descriptions.length !==0 
         || item.materials && item.materials.length !== 0 
         || item.measurements && item.measurements.length !== 0){
             const btn = clone.querySelector(".btn");
+            btn.dataset.id = item.id;
             btn.classList.add("d-block");
             btn.addEventListener("click", openModal);
         }
@@ -74,5 +74,22 @@ function showSearch(items){
 }
 
 function openModal(){
-    console.log(this.parentElement.parentElement.dataset.id);
+    console.log(this.dataset.id);
 }
+
+//modal taken from https://getbootstrap.com/docs/4.4/components/modal/#varying-modal-content
+$('#infoModal').on('show.bs.modal', function (event) {
+    const button = $(event.relatedTarget) // Button that triggered the modal
+    const itemId = button.data('id') // Extract info from data-* attributes
+    // Update the modal's content with jQuery
+    const modal = $(this)
+    modal.find('.modal-title').text('Title of item ' + itemId)
+    modal.find('.modal-body').text(itemId + ' content')
+  })
+
+//to do:
+// modal content
+// Search by name, image, collection, etc.
+// show more search results button
+// document code
+// clean up data?
