@@ -3,7 +3,7 @@ window.addEventListener("DOMContentLoaded", init);
 
 const userInput = document.querySelector("input[type=search]");
 const apiBase = "https://frontend.natmus.dk/api/";
-//the prototypes for all items, measurements and materials
+// the prototypes for all items, measurements and materials
 const Item = {
     id: null,
     collection: null,
@@ -31,8 +31,8 @@ function init(){
 
 function search(){
     if(userInput.value){
-        const requestUrl = `${apiBase}Search?query=${userInput.value}`;
-        //console.log(requestUrl);
+        const requestUrl = `${apiBase}Search?query=title:${userInput.value}`;
+        // console.log(requestUrl);
         getData(requestUrl);
     }
 }
@@ -40,8 +40,15 @@ function search(){
 async function getData(api){
     const response = await fetch(api);
     const searchItems = await response.json();
-    //console.log(searchItems);
+    // console.log(searchItems);
     showSearch(searchItems);
+}
+// solve repetition: https://stackoverflow.com/questions/14220321/how-do-i-return-the-response-from-an-asynchronous-call
+async function getModalData(api){
+    const response = await fetch(api);
+    let modalItem = await response.json();
+    modalItem = modalItem[0];
+    updateModalContent(modalItem);
 }
 
 function showSearch(items){
@@ -60,36 +67,52 @@ function showSearch(items){
         clone.querySelector(".card-title").textContent = item.title;
         clone.querySelector(".collection").textContent = item.collection;
         clone.querySelector(".identification").textContent = item.identification;
-        //console.log(item.title, item.descriptions, item.materials, item.measurements);
+        // console.log(item.title, item.descriptions, item.materials, item.measurements);
         if(item.descriptions && item.descriptions.length !==0 
         || item.materials && item.materials.length !== 0 
         || item.measurements && item.measurements.length !== 0){
             const btn = clone.querySelector(".btn");
             btn.dataset.id = item.id;
+            btn.dataset.identification = item.identification;
             btn.classList.add("d-block");
-            btn.addEventListener("click", openModal);
+            // btn.addEventListener("click", openModal);
         }
         dataList.appendChild(clone);
     })
 }
 
-function openModal(){
-    console.log(this.dataset.id);
+// function openModal(){
+//     console.log(this.dataset.id);
+// }
+
+function escapeChars(word){
+    if(word.indexOf("/")!==-1){
+        return word.replace("/",'\\/');
+    }else{
+        return word;
+    }
 }
 
-//modal taken from https://getbootstrap.com/docs/4.4/components/modal/#varying-modal-content
+// modal taken from https://getbootstrap.com/docs/4.4/components/modal/#varying-modal-content
 $('#infoModal').on('show.bs.modal', function (event) {
     const button = $(event.relatedTarget) // Button that triggered the modal
     const itemId = button.data('id') // Extract info from data-* attributes
-    // Update the modal's content with jQuery
-    const modal = $(this)
-    modal.find('.modal-title').text('Title of item ' + itemId)
-    modal.find('.modal-body').text(itemId + ' content')
+    const itemId2 = escapeChars(button.data('identification'));
+    const requestUrl = `${apiBase}Search?query=id:${itemId} AND identification:${itemId2}`;
+    getModalData(requestUrl);    
   })
+// Update the modal's content with jQuery
+  function updateModalContent(item){
+    //console.log(item)
+    const modal = $('#infoModal')
+    modal.find('.modal-title').text(item.title)
+    modal.find('.modal-body').text('collection: '+item.collection)
+  }
 
 //to do:
 // modal content
 // Search by name, image, collection, etc.
-// show more search results button
+// load more results button
 // document code
+// add data types?
 // clean up data?
