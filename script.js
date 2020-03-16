@@ -1,7 +1,7 @@
 "use strict";
 window.addEventListener("DOMContentLoaded", init);
 
-const userInput = document.querySelector("input[type=search]");
+const userInput = document.querySelectorAll("input[type=search]");
 const apiBase = "https://frontend.natmus.dk/api/";
 // the prototypes for all items, measurements and materials
 const Item = {
@@ -26,12 +26,38 @@ const Material = {
 };
 
 function init(){
-    userInput.addEventListener("keyup", search);
+    userInput.forEach(input => {
+        input.addEventListener("keyup", search);
+    })
 }
 
+function escapeChars(word){
+    if(typeof word === "string" && word.indexOf("/") !== -1){
+        return word.replace("/",'\\/');
+    }else{
+        return word;
+    }
+}
+
+function buildUrl(input, query){
+    let requestUrl = `${apiBase}Search?query=${query}:`;
+    const aWords = input.split(" ");
+    // console.log(aWords);
+    aWords.forEach(word => {
+        if(word === aWords[0]){
+            requestUrl = requestUrl+word;
+        }else if(word !== ""){
+            requestUrl = `${requestUrl} AND ${word}`;
+        }
+    })
+    return requestUrl;
+}
+// To do: combine search fields
 function search(){
-    if(userInput.value){
-        const requestUrl = `${apiBase}Search?query=title:${userInput.value}`;
+    if(this.value){
+        const input = escapeChars(this.value);
+        const query = this.dataset.search;
+        const requestUrl = buildUrl(input, query)
         // console.log(requestUrl);
         getData(requestUrl);
     }
@@ -47,7 +73,6 @@ async function getData(requestUrl){
 function showSearch(items){
     const itemTemplate = document.querySelector(".templates");
     const dataList = document.querySelector("#dataList");
-
     dataList.innerHTML = "";
 
     items.forEach(item => {
@@ -55,7 +80,9 @@ function showSearch(items){
         if(item.images && item.images.length !== 0){
             const img = clone.querySelector("img");
             img.src = `https://frontend.natmus.dk/api/Image?id=${item.images[0]}`;
-            img.alt = item.title.toLowerCase();
+            if(item.title){
+                img.alt = item.title.toLowerCase();
+            }
         }
         clone.querySelector(".card-title").textContent = item.title;
         clone.querySelector(".collection").textContent = item.collection;
@@ -73,15 +100,9 @@ function showSearch(items){
     })
 }
 
-function escapeChars(word){
-    if(typeof word === "string" && word.indexOf("/") !== -1){
-        return word.replace("/",'\\/');
-    }else{
-        return word;
-    }
-}
+// ---------------------------------- Modal start ----------------------------------
 
-// Modal jQuery partly taken from https://getbootstrap.com/docs/4.4/components/modal/#varying-modal-content
+// jQuery taken from https://getbootstrap.com/docs/4.4/components/modal/#varying-modal-content
 $('#infoModal').on('show.bs.modal', function (event) {
     const button = $(event.relatedTarget); // Button that triggered the modal
     const itemId = button.data('id'); // Extract info from data-* attributes
@@ -136,6 +157,8 @@ $('#infoModal').on('show.bs.modal', function (event) {
   function setModalDescriptions(descriptions){
       console.log("descriptions: ", descriptions);
   }
+
+// ---------------------------------- Modal end ----------------------------------
 
 //to do:
 // modal descriptions, materials and measurements

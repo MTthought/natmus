@@ -12,7 +12,8 @@
 
         <!-- Search bar -->
         <form role="search" class="py-4">
-            <input type="search" placeholder="Search by title..." class="form-control">
+            <input type="search" placeholder="Search by title..." class="form-control" data-search="title">
+            <input type="search" placeholder="Search by collection..." class="form-control" data-search="collection">
         </form>
 
         <!-- List of items -->
@@ -30,6 +31,7 @@
             </button>
             </div>
             <div class="modal-body">
+                <div>Collection: <span class="collection font-weight-light"></span></div>
                 <div id="carouselControls" class="carousel slide" data-ride="carousel">
                     <div class="carousel-inner"></div>
                     <a class="carousel-control-prev" href="#carouselControls" role="button" data-slide="prev">
@@ -40,8 +42,7 @@
                       <span class="carousel-control-next-icon" aria-hidden="true"></span>
                       <span class="sr-only">Next</span>
                     </a>
-                  </div>
-                  <div>Collection: <span class="collection font-weight-light"></span></div>
+                </div>
             </div>
             <div class="modal-footer">
               <div>Identification: <span class="identification font-weight-light"></span></div>
@@ -72,7 +73,7 @@
 
     <!-- Modal images template -->
     <template class="imgTemplate">
-        <div class="carousel-item mb-3">
+        <div class="carousel-item mt-3">
             <img src="" class="d-block w-100" alt="">
         </div>
     </template>
