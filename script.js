@@ -37,18 +37,11 @@ function search(){
     }
 }
 
-async function getData(api){
-    const response = await fetch(api);
-    const searchItems = await response.json();
-    // console.log(searchItems);
-    showSearch(searchItems);
-}
-// solve repetition: https://stackoverflow.com/questions/14220321/how-do-i-return-the-response-from-an-asynchronous-call
-async function getModalData(api){
-    const response = await fetch(api);
-    let modalItem = await response.json();
-    modalItem = modalItem[0];
-    updateModalContent(modalItem);
+async function getData(requestUrl){
+    const response = await fetch(requestUrl);
+    const jData = await response.json();
+    // console.log(jData);
+    showSearch(jData);
 }
 
 function showSearch(items){
@@ -75,42 +68,77 @@ function showSearch(items){
             btn.dataset.id = item.id;
             btn.dataset.identification = item.identification;
             btn.classList.add("d-block");
-            // btn.addEventListener("click", openModal);
         }
         dataList.appendChild(clone);
     })
 }
 
-// function openModal(){
-//     console.log(this.dataset.id);
-// }
-
 function escapeChars(word){
-    if(word.indexOf("/")!==-1){
+    if(typeof word === "string" && word.indexOf("/") !== -1){
         return word.replace("/",'\\/');
     }else{
         return word;
     }
 }
 
-// modal taken from https://getbootstrap.com/docs/4.4/components/modal/#varying-modal-content
+// Modal jQuery partly taken from https://getbootstrap.com/docs/4.4/components/modal/#varying-modal-content
 $('#infoModal').on('show.bs.modal', function (event) {
-    const button = $(event.relatedTarget) // Button that triggered the modal
-    const itemId = button.data('id') // Extract info from data-* attributes
+    const button = $(event.relatedTarget); // Button that triggered the modal
+    const itemId = button.data('id'); // Extract info from data-* attributes
     const itemId2 = escapeChars(button.data('identification'));
-    const requestUrl = `${apiBase}Search?query=id:${itemId} AND identification:${itemId2}`;
-    getModalData(requestUrl);    
+    const requestData = `id:${itemId} AND identification:${itemId2}`;
+    // Update the modal's content
+    $.ajax({
+        url: `${apiBase}Search`,
+       data: {query:requestData}
+      }).done(function(jData){
+        const modalItem = jData[0];
+        const modal = $('#infoModal');
+        modal.find('.modal-title').text(modalItem.title);
+        modal.find('.collection').text(modalItem.collection);
+        modal.find('.identification').text(modalItem.identification);
+        if(modalItem.images && modalItem.images.length !== 0){
+            setModalImgs(modalItem.images, modalItem.title);
+        }
+        if(modalItem.descriptions && modalItem.descriptions.length !==0){
+            setModalDescriptions(modalItem.descriptions);
+        }
+      })
   })
-// Update the modal's content with jQuery
-  function updateModalContent(item){
-    //console.log(item)
-    const modal = $('#infoModal')
-    modal.find('.modal-title').text(item.title)
-    modal.find('.modal-body').text('collection: '+item.collection)
+
+// Remove modal images after closing
+  $('#infoModal').on('hide.bs.modal', function() {
+      if(document.querySelector(".carousel-item")){
+        const imgContainer = document.querySelector(".carousel-inner");
+        while (imgContainer.hasChildNodes()) {  
+            imgContainer.removeChild(imgContainer.firstChild);
+          }
+    }
+  })
+
+  function setModalImgs(images, title){
+    const imgTemplate = document.querySelector(".imgTemplate");
+    const imgContainer = document.querySelector(".carousel-inner");
+    imgContainer.innerHTML = "";
+
+    images.forEach(img => {
+        const cloneImg = imgTemplate.cloneNode(true).content;
+        cloneImg.querySelector("img").src =`https://frontend.natmus.dk/api/Image?id=${img}`;
+        cloneImg.querySelector("img").alt = title;
+        if(img === images[0]){
+            //console.log(images);
+            cloneImg.querySelector(".carousel-item").classList.add("active");
+        }
+        imgContainer.appendChild(cloneImg);
+    })
+  }
+
+  function setModalDescriptions(descriptions){
+      console.log("descriptions: ", descriptions);
   }
 
 //to do:
-// modal content
+// modal descriptions, materials and measurements
 // Search by name, image, collection, etc.
 // load more results button
 // document code
