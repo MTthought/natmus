@@ -3,6 +3,7 @@ window.addEventListener("DOMContentLoaded", init);
 
 const userInput = document.querySelectorAll("input[type=search]");
 const apiBase = "https://frontend.natmus.dk/api/";
+const HTML = {};
 // the prototypes for all items, measurements and materials
 const Item = {
     id: null,
@@ -33,7 +34,8 @@ function init(){
 
 function escapeChars(word){
     if(typeof word === "string" && word.indexOf("/") !== -1){
-        return word.replace("/",'\\/');
+        // this replaces all occurrences of '/' https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_Special_Characters
+        return word.replace(/[/]/g,'\\/');
     }else{
         return word;
     }
@@ -114,10 +116,10 @@ $('#infoModal').on('show.bs.modal', function (event) {
        data: {query:requestData}
       }).done(function(jData){
         const modalItem = jData[0];
-        const modal = $('#infoModal');
-        modal.find('.modal-title').text(modalItem.title);
-        modal.find('.collection').text(modalItem.collection);
-        modal.find('.identification').text(modalItem.identification);
+        HTML.modal = document.querySelector("#infoModal");
+        HTML.modal.querySelector('.modal-title').textContent = modalItem.title;
+        HTML.modal.querySelector('.collection').textContent = modalItem.collection;
+        HTML.modal.querySelector('.identification').textContent = modalItem.identification;
         if(modalItem.images && modalItem.images.length !== 0){
             setModalImgs(modalItem.images, modalItem.title);
         }
@@ -127,15 +129,27 @@ $('#infoModal').on('show.bs.modal', function (event) {
       })
   })
 
-// Remove modal images after closing
-  $('#infoModal').on('hide.bs.modal', function() {
-      if(document.querySelector(".carousel-item")){
+// Remove modal images and display of optional fields after closing
+$('#infoModal').on('hide.bs.modal', function() {
+
+    //images
+    if(document.querySelector(".carousel-item")){
         const imgContainer = document.querySelector(".carousel-inner");
         while (imgContainer.hasChildNodes()) {  
             imgContainer.removeChild(imgContainer.firstChild);
-          }
+        }
     }
-  })
+
+    //descriptions
+    if(HTML.descriptionContainer){
+        HTML.descriptionContainer.classList.add("d-none");
+    }
+    if(document.querySelector(".list-group-item")){
+        while (HTML.descriptionList.hasChildNodes()) {  
+            HTML.descriptionList.removeChild(HTML.descriptionList.firstChild);
+        }
+    }
+})
 
   function setModalImgs(images, title){
     const imgTemplate = document.querySelector(".imgTemplate");
@@ -155,14 +169,29 @@ $('#infoModal').on('show.bs.modal', function (event) {
   }
 
   function setModalDescriptions(descriptions){
-      console.log("descriptions: ", descriptions);
-  }
+      //console.log("descriptions: ", descriptions);
+      HTML.descriptionContainer = HTML.modal.querySelector("div.modal-body > div:nth-child(2)");
+      HTML.descriptionContainer.classList.remove("d-none");
+
+      HTML.descriptionTemplate = document.querySelector(".descriptionTemplate");
+      HTML.descriptionList = HTML.descriptionContainer.querySelector("ul");
+      //console.log(HTML.descriptionList);
+      HTML.descriptionList.innerHTML = "";
+
+      descriptions.forEach(description => {
+          //console.log(description);
+          const cloneDescription = HTML.descriptionTemplate.cloneNode(true).content;
+          cloneDescription.querySelector("li").textContent = description;
+          HTML.descriptionList.appendChild(cloneDescription);
+      })
+    }
 
 // ---------------------------------- Modal end ----------------------------------
 
 //to do:
-// modal descriptions, materials and measurements
-// Search by name, image, collection, etc.
+// modal materials and measurements
+// HTML object
+// Search by name, identification, collection, etc.
 // load more results button
 // document code
 // add data types?

@@ -32,6 +32,11 @@
             </div>
             <div class="modal-body">
                 <div>Collection: <span class="collection font-weight-light"></span></div>
+                <div class="d-none pt-4">Description: 
+                    <ul class="list-group list-group-flush font-weight-light">
+                    </ul>
+                </div>
+
                 <div id="carouselControls" class="carousel slide" data-ride="carousel">
                     <div class="carousel-inner"></div>
                     <a class="carousel-control-prev" href="#carouselControls" role="button" data-slide="prev">
@@ -76,6 +81,11 @@
         <div class="carousel-item mt-3">
             <img src="" class="d-block w-100" alt="">
         </div>
+    </template>
+
+    <!-- Modal description template -->
+    <template class="descriptionTemplate">
+        <li class="list-group-item"></li>
     </template>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
