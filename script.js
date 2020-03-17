@@ -24,11 +24,13 @@ function init(){
     HTML.descriptionList = HTML.descriptionContainer.querySelector("ul");
     HTML.materialContainer = HTML.modal.querySelector("div.modal-body > div:nth-child(3)");
     HTML.materialList = HTML.materialContainer.querySelector("ul");
+    HTML.measurementContainer = HTML.modal.querySelector("div.modal-body > div:nth-child(4)");
+    HTML.measurementList = HTML.measurementContainer.querySelector("ul");
 }
 
 function escapeChars(word){
     if(typeof word === "string" && word.indexOf("/") !== -1){
-        // this replaces all occurrences of '/' https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_Special_Characters
+        // replace all occurrences of '/' https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_Special_Characters
         return word.replace(/[/]/g,'\\/');
     }else{
         return word;
@@ -36,26 +38,36 @@ function escapeChars(word){
 }
 
 function buildUrl(input, query){
-    let requestUrl = `${apiBase}Search?query=${query}:`;
+    // resgister on url whether the search is by title, collection, etc.
+    let urlEnd = query;
     const aWords = input.split(" ");
     aWords.forEach(word => {
+        // add colon before first search word, add AND before any extra words (excluding spaces)
         if(word === aWords[0]){
-            requestUrl = requestUrl+word;
+            urlEnd = `${urlEnd}:${word}`;
         }else if(word !== ""){
-            requestUrl = `${requestUrl} AND ${word}`;
+            urlEnd = `${urlEnd} AND ${word}`;
         }
     })
-    return requestUrl;
+    return urlEnd;
 }
 
-// To do: combine search fields
 function search(){
-    const inputBox = this;
-    if(inputBox.value){
-        const input = escapeChars(inputBox.value);
-        const query = inputBox.dataset.search;
-        const requestUrl = buildUrl(input, query);
-        getData(requestUrl);
+    const currentInputBox = this;
+    if(currentInputBox.value){
+        let requestUrl = `${apiBase}Search?query=`;
+        HTML.inputBoxes.forEach(inputBox => {
+            if(inputBox.value){
+                const input = escapeChars(inputBox.value);
+                const query = inputBox.dataset.search;
+                if(inputBox === HTML.inputBoxes[0] || !HTML.inputBoxes[0].value){
+                    requestUrl = requestUrl + buildUrl(input, query);
+                }else{
+                    requestUrl = requestUrl + " AND " + buildUrl(input, query);
+                }
+            }
+        })
+        getData(requestUrl);  
     }
 }
 
@@ -117,6 +129,9 @@ $('#infoModal').on('show.bs.modal', function (event) {
         if(item.materials && item.materials.length !==0){
             setModalList(item.materials, HTML.materialContainer, HTML.materialList);
         }
+        if(item.measurements && item.measurements.length !==0){
+            setModalList(item.measurements, HTML.measurementContainer, HTML.measurementList);
+        }
       })
   })
 
@@ -150,22 +165,28 @@ function setModalImgs(images, title){
     })
 }
 
-function buildString(material){
+function buildString(oData){
     let newString = "";
-    if(material.type){
-        newString = newString + material.type;
-        if(material.color || material.processing){
+    if(oData.type){
+        newString = newString + oData.type;
+        if(oData.color || oData.processing || oData.value || oData.unit){
             newString = newString + ": ";
         }
     }
-    if(material.color){
-        newString = newString + material.color;
-        if(material.processing){
+    if(oData.color){
+        newString = newString + oData.color;
+        if(oData.processing){
             newString = newString + ", ";
         }
     }
-    if(material.processing){
-        newString = newString + material.processing;
+    if(oData.value){
+        newString = newString + oData.value + " ";  
+    }
+    if(oData.processing){
+        newString = newString + oData.processing;
+    }
+    if(oData.unit){
+        newString = newString + oData.unit;
     }
     return newString;
 }
@@ -188,9 +209,8 @@ function buildString(material){
 // ---------------------------------- Modal end ----------------------------------
 
 //to do:
-// modal measurements
-// Search by name, identification, collection, etc.
 // load more results button
 // document code
 // add data types?
 // clean up data?
+// Search by identification
