@@ -5,13 +5,18 @@ const apiBase = "https://frontend.natmus.dk/api/";
 const HTML = {};
 
 function init(){
+    // Search bar
     HTML.inputBoxes = document.querySelectorAll("input[type=search]");
     HTML.inputBoxes.forEach(inputBox => {
         inputBox.addEventListener("keyup", search);
     })
-    // item list
+    // search list
     HTML.itemTemplate = document.querySelector(".templates");
     HTML.dataList = document.querySelector("#dataList");
+    // error and load more
+    HTML.errorMsg = document.querySelector("body > div.container > div.text-danger");
+    HTML.loadMoreBtn = document.querySelector("body > div.container > button");
+    HTML.loadMoreBtn.addEventListener("click", loadMore);
     // modal
     HTML.modal = document.querySelector("#infoModal");
     HTML.title = HTML.modal.querySelector('.modal-title');
@@ -38,11 +43,11 @@ function escapeChars(word){
 }
 
 function buildUrl(input, query){
-    // resgister on url whether the search is by title, collection, etc.
+    // resgister whether the search is by title, collection, etc.
     let urlEnd = query;
     const aWords = input.split(" ");
     aWords.forEach(word => {
-        // add colon before first search word, add AND before any extra words (excluding spaces)
+        // add colon before first word, add AND before any extra words (excluding spaces)
         if(word === aWords[0]){
             urlEnd = `${urlEnd}:${word}`;
         }else if(word !== ""){
@@ -52,6 +57,7 @@ function buildUrl(input, query){
     return urlEnd;
 }
 
+// generate request url for multiple search queries
 function search(){
     const currentInputBox = this;
     if(currentInputBox.value){
@@ -71,37 +77,63 @@ function search(){
     }
 }
 
+// generate response and check if ok, otherwise display error message
 async function getData(requestUrl){
     const response = await fetch(requestUrl);
-    const jData = await response.json();
-    showSearch(jData);
+    if(response.status === 200){
+        const jData = await response.json();
+        showSearch(jData);
+    }else{
+        HTML.errorMsg.classList.remove("d-none");
+    }
 }
 
-function showSearch(items){
-    HTML.dataList.innerHTML = "";
+function buildAltTxt(title){
+    if(title){
+        return title.toLowerCase();
+    }
+}
 
-    items.forEach(item => {
-        const clone = HTML.itemTemplate.cloneNode(true).content;
-        if(item.images && item.images.length !== 0){
-            const img = clone.querySelector("img");
-            img.src = `https://frontend.natmus.dk/api/Image?id=${item.images[0]}`;
-            if(item.title){
-                img.alt = item.title.toLowerCase();
+// display data
+function showSearch(items){
+        // build items from HTML template
+        HTML.dataList.innerHTML = "";
+        items.forEach(item => {
+            const clone = HTML.itemTemplate.cloneNode(true).content;
+            if(item.images && item.images.length !== 0){
+                const img = clone.querySelector("img");
+                img.src = `https://frontend.natmus.dk/api/Image?id=${item.images[0]}`;
+                img.alt = buildAltTxt(item.title);
             }
+            clone.querySelector(".card-title").textContent = item.title;
+            clone.querySelector(".card-subtitle").textContent = item.identification;
+            clone.querySelector(".collection").textContent = item.collection;
+            // show button if item has descriptions, materials, measurements or more than 1 image
+            if(item.descriptions && item.descriptions.length !==0 
+            || item.materials && item.materials.length !== 0 
+            || item.measurements && item.measurements.length !== 0
+            || item.images && item.images.length > 1){
+                const btn = clone.querySelector(".btn");
+                btn.dataset.id = item.id;
+                btn.dataset.identification = item.identification;
+                btn.classList.remove("d-none");
+            }
+            HTML.dataList.appendChild(clone);
+        })
+        // remove error message if new response is ok
+        if(!HTML.errorMsg.classList.contains("d-none")){
+            HTML.errorMsg.classList.add("d-none");
         }
-        clone.querySelector(".card-title").textContent = item.title;
-        clone.querySelector(".card-subtitle").textContent = item.identification;
-        clone.querySelector(".collection").textContent = item.collection;
-        if(item.descriptions && item.descriptions.length !==0 
-        || item.materials && item.materials.length !== 0 
-        || item.measurements && item.measurements.length !== 0){
-            const btn = clone.querySelector(".btn");
-            btn.dataset.id = item.id;
-            btn.dataset.identification = item.identification;
-            btn.classList.remove("d-none");
+        // show load more button if all search results are not on display
+        if(items.length === 10){
+            HTML.loadMoreBtn.classList.remove("d-none");
+        }else{
+            HTML.loadMoreBtn.classList.add("d-none");
         }
-        HTML.dataList.appendChild(clone);
-    })
+}
+
+function loadMore(){
+    console.log("btn clicked");
 }
 
 // ---------------------------------- Modal start ----------------------------------
@@ -135,29 +167,13 @@ $('#infoModal').on('show.bs.modal', function (event) {
       })
   })
 
-$('#infoModal').on('hide.bs.modal', function() {
-    // Remove modal images
-    if(document.querySelector(".carousel-item")){
-        while (HTML.imgContainer.hasChildNodes()) {  
-            HTML.imgContainer.removeChild(HTML.imgContainer.firstChild);
-        }
-    }
-    // Remove modal descriptions
-    if(document.querySelector(".list-group-item")){
-        HTML.descriptionContainer.classList.add("d-none");
-        while (HTML.descriptionList.hasChildNodes()) {  
-            HTML.descriptionList.removeChild(HTML.descriptionList.firstChild);
-        }
-    }
-})
-
 function setModalImgs(images, title){
+    // build carousel items from HTML template
     HTML.imgContainer.innerHTML = "";
-
     images.forEach(img => {
         const clone = HTML.imgTemplate.cloneNode(true).content;
         clone.querySelector("img").src =`https://frontend.natmus.dk/api/Image?id=${img}`;
-        clone.querySelector("img").alt = title;
+        clone.querySelector("img").alt = buildAltTxt(title);
         if(img === images[0]){
             clone.querySelector(".carousel-item").classList.add("active");
         }
@@ -193,8 +209,8 @@ function buildString(oData){
 
   function setModalList(data, displayBox, innerBox){
     displayBox.classList.remove("d-none");
+    // build list items from HTML template
     innerBox.innerHTML = "";
-
     data.forEach(dataElement => {
         const clone = HTML.listItemTemplate.cloneNode(true).content;
         let text = dataElement;
@@ -206,11 +222,26 @@ function buildString(oData){
     })
   }
 
+// remove images and lists when closing modal
+$('#infoModal').on('hide.bs.modal', function() {
+    if(document.querySelector(".carousel-item")){
+        while (HTML.imgContainer.hasChildNodes()) {  
+            HTML.imgContainer.removeChild(HTML.imgContainer.firstChild);
+        }
+    }
+    if(document.querySelector(".list-group-item")){
+        HTML.descriptionContainer.classList.add("d-none");
+        while (HTML.descriptionList.hasChildNodes()) {  
+            HTML.descriptionList.removeChild(HTML.descriptionList.firstChild);
+        }
+    }
+})
+
 // ---------------------------------- Modal end ----------------------------------
 
 //to do:
 // load more results button
-// document code
+// document code?
 // add data types?
 // clean up data?
-// Search by identification
+// Search by identification?
