@@ -33,8 +33,10 @@
             <div class="modal-body">
                 <div>Collection: <span class="collection font-weight-light"></span></div>
                 <div class="d-none pt-4">Description: 
-                    <ul class="list-group list-group-flush font-weight-light">
-                    </ul>
+                    <ul class="list-group list-group-flush font-weight-light"></ul>
+                </div>
+                <div class="d-none pt-4">Material: 
+                    <ul class="list-group list-group-flush font-weight-light"></ul>
                 </div>
 
                 <div id="carouselControls" class="carousel slide" data-ride="carousel">
@@ -50,22 +52,22 @@
                 </div>
             </div>
             <div class="modal-footer">
-              <div>Identification: <span class="identification font-weight-light"></span></div>
+              <div class="identification"></div>
             </div>
         </div>
         </div>
     </div>
 
-    <!-- Item template -->
+    <!-- List item template -->
     <template class="templates">
         <div class="col-md-4 col-lg-3 pb-4">
             <div class="card">
                 <img src="" class="card-img-top" alt="">
                 <div class="card-body">
                   <h5 class="card-title"></h5>
+                  <h6 class="card-subtitle mb-2 text-muted"></h6>
                   <p class="card-text">
                     <div>Collection: <span class="collection font-weight-light"></span></div>
-                    <div>Identification: <span class="identification font-weight-light"></span></div>
                   </p>
                   <!-- Button trigger modal -->
                     <button type="button" class="btn btn-primary d-none" data-toggle="modal" data-target="#infoModal" data-id="" data-identification="">
@@ -76,15 +78,15 @@
         </div>
     </template>
 
-    <!-- Modal images template -->
+    <!-- Modal image template -->
     <template class="imgTemplate">
         <div class="carousel-item mt-3">
             <img src="" class="d-block w-100" alt="">
         </div>
     </template>
 
-    <!-- Modal description template -->
-    <template class="descriptionTemplate">
+    <!-- Modal list item template -->
+    <template class="listItemTemplate">
         <li class="list-group-item"></li>
     </template>
 
