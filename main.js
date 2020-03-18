@@ -49,7 +49,7 @@ function search(){
         let queryUrl = `${apiBase}Search?query=`;
         HTML.inputBoxes.forEach(inputBox => {
             if(inputBox.value){
-                const input = escapeChars(inputBox.value);
+                const input = escapeChars(inputBox.value); // escapeChars() defined at helper.js
                 const query = inputBox.dataset.search;
                 // if statement builds the 1st part of the queryUrl:
                 // for search by identification only
@@ -58,7 +58,7 @@ function search(){
                 if((!HTML.inputBoxes[0].value && !HTML.inputBoxes[1].value) 
                 || (!HTML.inputBoxes[0].value && inputBox === HTML.inputBoxes[1]) 
                 || inputBox === HTML.inputBoxes[0]){
-                    queryUrl += buildUrl(input, query);
+                    queryUrl += buildUrl(input, query); // buildUrl() defined at helper.js
                 }else{
                     queryUrl += " AND " + buildUrl(input, query);
                 }
@@ -88,7 +88,7 @@ function showSearch(items){
             if(item.images && item.images.length !== 0){
                 const img = clone.querySelector("img");
                 img.src = `https://frontend.natmus.dk/api/Image?id=${item.images[0]}`;
-                img.alt = buildAltTxt(item.title);
+                img.alt = buildAltTxt(item.title); // buildAltTxt() defined at helper.js
             }
             clone.querySelector(".card-title").textContent = item.title;
             clone.querySelector(".card-subtitle").textContent = item.identification;
@@ -129,7 +129,7 @@ function loadMore(){
 $('#infoModal').on('show.bs.modal', function (event) {
     const button = $(event.relatedTarget); // Button that triggered the modal
     const itemId = button.data('id'); // Extract info from data-* attributes
-    const itemId2 = escapeChars(button.data('identification'));
+    const itemId2 = escapeChars(button.data('identification')); // escapeChars() defined at helper.js
     // Update the modal's content
     $.ajax({
         url: `${apiBase}Search`,
@@ -160,7 +160,7 @@ function setModalImgs(images, title){
     images.forEach(img => {
         const clone = HTML.imgTemplate.cloneNode(true).content;
         clone.querySelector("img").src =`https://frontend.natmus.dk/api/Image?id=${img}`;
-        clone.querySelector("img").alt = buildAltTxt(title);
+        clone.querySelector("img").alt = buildAltTxt(title); // buildAltTxt() defined at helper.js
         if(img === images[0]){
             clone.querySelector(".carousel-item").classList.add("active");
         }
@@ -176,7 +176,7 @@ function setModalImgs(images, title){
         const clone = HTML.listItemTemplate.cloneNode(true).content;
         let text = dataElement;
         if(typeof text === "object"){
-            text = buildString(dataElement);
+            text = buildString(dataElement); // buildString() defined at helper.js
         }
         clone.querySelector("li").textContent = text;
         innerBox.appendChild(clone);
@@ -185,15 +185,17 @@ function setModalImgs(images, title){
 
 // remove images and lists when closing modal
 $('#infoModal').on('hide.bs.modal', function() {
-    if(document.querySelector(".carousel-item")){
-        while (HTML.imgContainer.hasChildNodes()) {  
-            HTML.imgContainer.removeChild(HTML.imgContainer.firstChild);
-        }
-    }
-    if(document.querySelector(".list-group-item")){
-        HTML.descriptionContainer.classList.add("d-none");
-        while (HTML.descriptionList.hasChildNodes()) {  
-            HTML.descriptionList.removeChild(HTML.descriptionList.firstChild);
-        }
-    }
+    HTML.descriptionContainer.classList.add("d-none");
+    HTML.measurementContainer.classList.add("d-none");
+    HTML.materialContainer.classList.add("d-none");
+    removeNodes(HTML.imgContainer);
+    removeNodes(HTML.descriptionList);
+    removeNodes(HTML.measurementList);
+    removeNodes(HTML.materialList);
 })
+
+function removeNodes(innerBox){
+    while (innerBox.hasChildNodes()) {  
+        innerBox.removeChild(innerBox.firstChild);
+    }
+}
