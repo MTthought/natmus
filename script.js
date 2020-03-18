@@ -34,6 +34,7 @@ function init(){
     HTML.measurementList = HTML.measurementContainer.querySelector("ul");
 }
 
+// helper function for search() and show modal function
 function escapeChars(word){
     if(typeof word === "string" && word.indexOf("/") !== -1){
         // replace all occurrences of '/' https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_Special_Characters
@@ -43,6 +44,7 @@ function escapeChars(word){
     }
 }
 
+// helper function for search()
 function buildUrl(input, query){
     // resgister whether the search is by title, collection, etc.
     let queryUrl = query;
@@ -50,9 +52,9 @@ function buildUrl(input, query){
     aWords.forEach(word => {
         // add colon before first word, add AND before any extra words (excluding spaces)
         if(word === aWords[0]){
-            queryUrl = `${queryUrl}:${word}`;
+            queryUrl += `:${word}`;
         }else if(word !== ""){
-            queryUrl = `${queryUrl} AND ${word}`;
+            queryUrl += ` AND ${word}`;
         }
     })
     return queryUrl;
@@ -73,9 +75,9 @@ function search(){
                 if((!HTML.inputBoxes[0].value && !HTML.inputBoxes[1].value) 
                 || (!HTML.inputBoxes[0].value && inputBox === HTML.inputBoxes[1]) 
                 || inputBox === HTML.inputBoxes[0]){
-                    queryUrl = queryUrl + buildUrl(input, query);
+                    queryUrl += buildUrl(input, query);
                 }else{
-                    queryUrl = queryUrl + " AND " + buildUrl(input, query);
+                    queryUrl += " AND " + buildUrl(input, query);
                 }
             }
         })
@@ -94,6 +96,7 @@ async function getData(requestUrl){
     }
 }
 
+// helper function for showSearch() and setModalImgs()
 function buildAltTxt(title){
     if(title){
         return title.toLowerCase();
@@ -138,6 +141,7 @@ function showSearch(items){
         }
 }
 
+// add 12 to searchSize global variable
 function loadMore(){
     searchSize += 12;
     search();
@@ -188,28 +192,29 @@ function setModalImgs(images, title){
     })
 }
 
+// helper function for setModalList()
 function buildString(oData){
     let newString = "";
     if(oData.type){
-        newString = newString + oData.type;
+        newString += oData.type;
         if(oData.color || oData.processing || oData.value || oData.unit){
-            newString = newString + ": ";
+            newString += ": ";
         }
     }
     if(oData.color){
-        newString = newString + oData.color;
+        newString += oData.color;
         if(oData.processing){
-            newString = newString + ", ";
+            newString += ", ";
         }
     }
     if(oData.value){
-        newString = newString + oData.value + " ";  
+        newString += oData.value + " ";  
     }
     if(oData.processing){
-        newString = newString + oData.processing;
+        newString += oData.processing;
     }
     if(oData.unit){
-        newString = newString + oData.unit;
+        newString += oData.unit;
     }
     return newString;
 }
