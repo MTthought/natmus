@@ -26,11 +26,11 @@ function init(){
     HTML.imgTemplate = document.querySelector(".imgTemplate");
     HTML.imgContainer = HTML.modal.querySelector(".carousel-inner");
     HTML.listItemTemplate = document.querySelector(".listItemTemplate");
-    HTML.descriptionContainer = HTML.modal.querySelector("div.modal-body > div:nth-child(2)");
+    HTML.descriptionContainer = HTML.modal.querySelector("div.modal-body > div:nth-child(3)");
     HTML.descriptionList = HTML.descriptionContainer.querySelector("ul");
-    HTML.materialContainer = HTML.modal.querySelector("div.modal-body > div:nth-child(3)");
+    HTML.materialContainer = HTML.modal.querySelector("div.modal-body > div:nth-child(4)");
     HTML.materialList = HTML.materialContainer.querySelector("ul");
-    HTML.measurementContainer = HTML.modal.querySelector("div.modal-body > div:nth-child(4)");
+    HTML.measurementContainer = HTML.modal.querySelector("div.modal-body > div:nth-child(5)");
     HTML.measurementList = HTML.measurementContainer.querySelector("ul");
 }
 
@@ -60,13 +60,19 @@ function buildUrl(input, query){
 
 // generate request url for multiple search queries
 function search(){
-    if(HTML.inputBoxes[0].value || HTML.inputBoxes[1].value){
+    if(HTML.inputBoxes[0].value || HTML.inputBoxes[1].value || HTML.inputBoxes[2].value){
         let queryUrl = `${apiBase}Search?query=`;
         HTML.inputBoxes.forEach(inputBox => {
             if(inputBox.value){
                 const input = escapeChars(inputBox.value);
                 const query = inputBox.dataset.search;
-                if(inputBox === HTML.inputBoxes[0] || !HTML.inputBoxes[0].value){
+                // if statement builds the 1st part of the queryUrl:
+                // for search by identification only
+                // for search by collection only or collection + identification
+                // for any search that contains title
+                if((!HTML.inputBoxes[0].value && !HTML.inputBoxes[1].value) 
+                || (!HTML.inputBoxes[0].value && inputBox === HTML.inputBoxes[1]) 
+                || inputBox === HTML.inputBoxes[0]){
                     queryUrl = queryUrl + buildUrl(input, query);
                 }else{
                     queryUrl = queryUrl + " AND " + buildUrl(input, query);
@@ -137,7 +143,7 @@ function loadMore(){
     search();
 }
 
-// ---------------------------------- Modal start ----------------------------------
+// ---------------------------------- Modal ----------------------------------
 
 // jQuery taken from https://getbootstrap.com/docs/4.4/components/modal/#varying-modal-content
 $('#infoModal').on('show.bs.modal', function (event) {
@@ -237,11 +243,3 @@ $('#infoModal').on('hide.bs.modal', function() {
         }
     }
 })
-
-// ---------------------------------- Modal end ----------------------------------
-
-//to do:
-// document code?
-// add data types?
-// clean up data?
-// Search by identification?

@@ -11,14 +11,15 @@
         <h1 class="pt-4">NatMus Frontend Assignment</h1>
 
         <!-- Search bar -->
-        <form role="search" class="py-4 row">
-            <div class="col-sm-6">
-                <h6>Title:</h6>
+        <form role="search" class="py-4 form-row">
+            <div class="col-sm-4">
                 <input type="search" placeholder="Search by title..." class="form-control" data-search="title">
             </div>
-            <div class="col-sm-6">
-                <h6>Collection:</h6>
+            <div class="col-sm-4">
                 <input type="search" placeholder="Search by collection..." class="form-control" data-search="collection">
+            </div>
+            <div class="col-sm-4">
+                <input type="search" placeholder="Search by identification..." class="form-control" data-search="identification">
             </div>
         </form>
 
@@ -43,7 +44,8 @@
             </button>
             </div>
             <div class="modal-body">
-                <div>Collection: <span class="collection font-weight-light"></span></div>
+                <h6 class="identification text-muted"></h6>
+                <div class="pt-3">Collection: <span class="collection font-weight-light"></span></div>
                 <div class="d-none pt-4">Description:
                     <ul class="list-group list-group-flush font-weight-light"></ul>
                 </div>
@@ -67,7 +69,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-              <div class="identification"></div>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
         </div>
