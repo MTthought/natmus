@@ -45,35 +45,35 @@ function escapeChars(word){
 
 function buildUrl(input, query){
     // resgister whether the search is by title, collection, etc.
-    let urlEnd = query;
+    let queryUrl = query;
     const aWords = input.split(" ");
     aWords.forEach(word => {
         // add colon before first word, add AND before any extra words (excluding spaces)
         if(word === aWords[0]){
-            urlEnd = `${urlEnd}:${word}`;
+            queryUrl = `${queryUrl}:${word}`;
         }else if(word !== ""){
-            urlEnd = `${urlEnd} AND ${word}`;
+            queryUrl = `${queryUrl} AND ${word}`;
         }
     })
-    return `${urlEnd}&size=${searchSize}`;
+    return queryUrl;
 }
 
 // generate request url for multiple search queries
 function search(){
     if(HTML.inputBoxes[0].value || HTML.inputBoxes[1].value){
-        let requestUrl = `${apiBase}Search?query=`;
+        let queryUrl = `${apiBase}Search?query=`;
         HTML.inputBoxes.forEach(inputBox => {
             if(inputBox.value){
                 const input = escapeChars(inputBox.value);
                 const query = inputBox.dataset.search;
                 if(inputBox === HTML.inputBoxes[0] || !HTML.inputBoxes[0].value){
-                    requestUrl = requestUrl + buildUrl(input, query);
+                    queryUrl = queryUrl + buildUrl(input, query);
                 }else{
-                    requestUrl = requestUrl + " AND " + buildUrl(input, query);
+                    queryUrl = queryUrl + " AND " + buildUrl(input, query);
                 }
             }
         })
-        getData(requestUrl);  
+        getData(`${queryUrl}&size=${searchSize}`);  
     }
 }
 
