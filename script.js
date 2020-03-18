@@ -2,15 +2,16 @@
 window.addEventListener("DOMContentLoaded", init);
 
 const apiBase = "https://frontend.natmus.dk/api/";
+let searchSize = 12;
 const HTML = {};
 
 function init(){
-    // Search bar
+    // search bar
     HTML.inputBoxes = document.querySelectorAll("input[type=search]");
     HTML.inputBoxes.forEach(inputBox => {
         inputBox.addEventListener("keyup", search);
     })
-    // search list
+    // list of items
     HTML.itemTemplate = document.querySelector(".templates");
     HTML.dataList = document.querySelector("#dataList");
     // error and load more
@@ -54,13 +55,12 @@ function buildUrl(input, query){
             urlEnd = `${urlEnd} AND ${word}`;
         }
     })
-    return urlEnd;
+    return `${urlEnd}&size=${searchSize}`;
 }
 
 // generate request url for multiple search queries
 function search(){
-    const currentInputBox = this;
-    if(currentInputBox.value){
+    if(HTML.inputBoxes[0].value || HTML.inputBoxes[1].value){
         let requestUrl = `${apiBase}Search?query=`;
         HTML.inputBoxes.forEach(inputBox => {
             if(inputBox.value){
@@ -125,7 +125,7 @@ function showSearch(items){
             HTML.errorMsg.classList.add("d-none");
         }
         // show load more button if all search results are not on display
-        if(items.length === 10){
+        if(items.length === searchSize){
             HTML.loadMoreBtn.classList.remove("d-none");
         }else{
             HTML.loadMoreBtn.classList.add("d-none");
@@ -133,7 +133,8 @@ function showSearch(items){
 }
 
 function loadMore(){
-    console.log("btn clicked");
+    searchSize += 12;
+    search();
 }
 
 // ---------------------------------- Modal start ----------------------------------
@@ -240,7 +241,6 @@ $('#infoModal').on('hide.bs.modal', function() {
 // ---------------------------------- Modal end ----------------------------------
 
 //to do:
-// load more results button
 // document code?
 // add data types?
 // clean up data?
