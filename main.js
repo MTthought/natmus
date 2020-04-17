@@ -58,10 +58,6 @@ function search(){
                 if(input){
                     input = escapeChars(input); // escapeChars() defined at helper.js
                     const field = inputBox.dataset.search;
-                    // quotation marks output result containing the exact words
-                    if(field === "identification"){
-                        input = `"${input}"`;
-                    }
                     // 1st part of sQuery - for search by:
                     if((!titleBox.value && !collectionBox.value) // identification only
                     || (!titleBox.value && inputBox === collectionBox) // collection only or collection + identification

@@ -10,15 +10,22 @@ export function escapeChars(word){
 
 // helper function for search()
 export function buildQuery(input, field){
-    // resgister whether the search is by title, collection, etc.
+    // resgister whether search is by title, collection or identification
     let sQuery = field;
     const aWords = input.split(" ");
+    // quotation marks output result containing the exact words
+    if(field === "identification"){
+        aWords.forEach(function(word, i) {
+            word = `"${word}"`;
+            aWords.splice(i, 1, word);
+        })
+    }
     aWords.forEach(word => {
         // add colon before first word, add AND before any extra words (excluding spaces)
         if(word === aWords[0]){
             sQuery += `:${word}`;
         }else if(word){
-            sQuery += ` AND ${word}`;
+            sQuery += `%20AND%20${word}`;
         }
     })
     return sQuery;
