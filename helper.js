@@ -9,19 +9,19 @@ export function escapeChars(word){
 }
 
 // helper function for search()
-export function buildUrl(input, query){
+export function buildQuery(input, field){
     // resgister whether the search is by title, collection, etc.
-    let queryUrl = query;
+    let sQuery = field;
     const aWords = input.split(" ");
     aWords.forEach(word => {
         // add colon before first word, add AND before any extra words (excluding spaces)
         if(word === aWords[0]){
-            queryUrl += `:${word}`;
-        }else if(word !== ""){
-            queryUrl += ` AND ${word}`;
+            sQuery += `:${word}`;
+        }else if(word){
+            sQuery += ` AND ${word}`;
         }
     })
-    return queryUrl;
+    return sQuery;
 }
 
 // helper function for showSearch() and setModalImgs()

@@ -1,6 +1,6 @@
 "use strict";
 import { escapeChars } from "./helper.js";
-import { buildUrl } from "./helper.js";
+import { buildQuery } from "./helper.js";
 import { buildAltTxt } from "./helper.js";
 import { buildString } from "./helper.js";
 
@@ -45,26 +45,40 @@ function init(){
 
 // generate request url for multiple search queries
 function search(){
-    if(HTML.inputBoxes[0].value || HTML.inputBoxes[1].value || HTML.inputBoxes[2].value){
-        let queryUrl = `${apiBase}Search?query=`;
+    const titleBox = HTML.inputBoxes[0];
+    const collectionBox = HTML.inputBoxes[1];
+    const idBox = HTML.inputBoxes[2];
+
+    if(titleBox.value || collectionBox.value || idBox.value){
+        let sQuery = `${apiBase}Search?query=`;
         HTML.inputBoxes.forEach(inputBox => {
             if(inputBox.value){
-                const input = escapeChars(inputBox.value); // escapeChars() defined at helper.js
-                const query = inputBox.dataset.search;
-                // if statement builds the 1st part of the queryUrl:
-                // for search by identification only
-                // for search by collection only or collection + identification
-                // for any search that contains title
-                if((!HTML.inputBoxes[0].value && !HTML.inputBoxes[1].value) 
-                || (!HTML.inputBoxes[0].value && inputBox === HTML.inputBoxes[1]) 
-                || inputBox === HTML.inputBoxes[0]){
-                    queryUrl += buildUrl(input, query); // buildUrl() defined at helper.js
+                let input = inputBox.value.trim(); // remove space before and after words
+                // build on sQuery if user types in smth different from space
+                if(input){
+                    input = escapeChars(input); // escapeChars() defined at helper.js
+                    const field = inputBox.dataset.search;
+                    // quotation marks output result containing the exact words
+                    if(field === "identification"){
+                        input = `"${input}"`;
+                    }
+                    // 1st part of sQuery - for search by:
+                    if((!titleBox.value && !collectionBox.value) // identification only
+                    || (!titleBox.value && inputBox === collectionBox) // collection only or collection + identification
+                    || inputBox === titleBox){ // any search that contains title
+                        sQuery += buildQuery(input, field); // buildQuery() defined at helper.js
+                    }else{ // 2nd part of sQuery
+                        // eg. https://frontend.natmus.dk/api/Search?query=title:u%20AND%20identification:2455\/2005
+                        sQuery += "%20AND%20" + buildQuery(input, field);
+                    }
                 }else{
-                    queryUrl += " AND " + buildUrl(input, query);
+                    sQuery = ""; // empty sQuery if user only types in spaces
                 }
             }
         })
-        getData(`${queryUrl}&size=${searchSize}`);  
+        if(sQuery){ // go to getData() if sQuery isn't empty
+            getData(`${sQuery}&size=${searchSize}`);
+        }
     }
 }
 
