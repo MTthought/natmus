@@ -1,4 +1,4 @@
-// helper function for search() and show modal function
+// helper function for search()
 export function escapeChars(word){
     if(typeof word === "string" && word.indexOf("/") !== -1){
         // replace all occurrences of '/' with regular expression
@@ -31,7 +31,7 @@ export function buildQuery(input, field){
     return sQuery;
 }
 
-// helper function for showSearch() and setModalImgs()
+// helper function for showList() and setModalImgs()
 export function buildAltTxt(title){
     if(title){
         return title.toLowerCase();

@@ -7,7 +7,10 @@ import { buildString } from "./helper.js";
 window.addEventListener("DOMContentLoaded", init);
 
 const apiBase = "https://frontend.natmus.dk/api/";
-let searchSize = 12;
+let store = {
+    searchSize: 12,
+    items: []
+};
 const HTML = {};
 
 function domSelectors(){
@@ -73,7 +76,7 @@ function search(){
             }
         })
         if(sQuery){ // go to getData() if sQuery isn't empty
-            getData(`${sQuery}&size=${searchSize}`);
+            getData(`${sQuery}&size=${store.searchSize}`);
         }
     }
 }
@@ -82,29 +85,29 @@ function search(){
 async function getData(requestUrl){
     const response = await fetch(requestUrl);
     if(response.status === 200){
-        const jData = await response.json();
-        showSearch(jData);
+        store.items = await response.json();
+        showList();
     }else{
         HTML.errorMsg.classList.remove("d-none");
     }
 }
 
 // display data
-function showSearch(items){
+function showList(){
         // build items from HTML template
         HTML.dataList.innerHTML = "";
-        items.forEach(item => {
+        store.items.forEach(item => {
             const clone = HTML.itemTemplate.cloneNode(true).content;
             if(item.images && item.images.length !== 0){
                 const img = clone.querySelector("img");
-                img.src = `https://frontend.natmus.dk/api/Image?id=${item.images[0]}`;
+                img.src = `${apiBase}Image?id=${item.images[0]}`;
                 img.alt = buildAltTxt(item.title); // buildAltTxt() defined at helper.js
             }
             clone.querySelector(".card-title").textContent = item.title;
             clone.querySelector(".card-subtitle").textContent = item.identification;
             clone.querySelector(".collection").textContent = item.collection;
             // show button if item has descriptions, materials, measurements or more than 1 image
-            if(item.descriptions && item.descriptions.length !==0 
+            if(item.descriptions && item.descriptions.length !== 0 
             || item.materials && item.materials.length !== 0 
             || item.measurements && item.measurements.length !== 0
             || item.images && item.images.length > 1){
@@ -120,16 +123,16 @@ function showSearch(items){
             HTML.errorMsg.classList.add("d-none");
         }
         // show load more button if all search results are not on display
-        if(items.length === searchSize){
+        if(store.items.length === store.searchSize){
             HTML.loadMoreBtn.classList.remove("d-none");
         }else{
             HTML.loadMoreBtn.classList.add("d-none");
         }
 }
 
-// add 12 to searchSize global variable
+// add 12 to searchSize in store
 function loadMore(){
-    searchSize += 12;
+    store.searchSize += 12;
     search();
 }
 
@@ -139,29 +142,24 @@ function loadMore(){
 $('#infoModal').on('show.bs.modal', function (event) {
     const button = $(event.relatedTarget); // Button that triggered the modal
     const itemId = button.data('id'); // Extract info from data-* attributes
-    const itemId2 = escapeChars(button.data('identification')); // escapeChars() defined at helper.js
+    const itemIdent = button.data('identification');
     // Update the modal's content
-    $.ajax({
-        url: `${apiBase}Search`,
-       data: {query:`id:${itemId} AND identification:${itemId2}`}
-      }).done(function(jData){
-        const item = jData[0];
-        HTML.title.textContent = item.title;
-        HTML.collection.textContent = item.collection;
-        HTML.identification.textContent = item.identification;
-        if(item.images && item.images.length !== 0){
-            setModalImgs(item.images, item.title);
-        }
-        if(item.descriptions && item.descriptions.length !==0){
-            setModalList(item.descriptions, HTML.descriptionContainer, HTML.descriptionList);
-        }
-        if(item.materials && item.materials.length !==0){
-            setModalList(item.materials, HTML.materialContainer, HTML.materialList);
-        }
-        if(item.measurements && item.measurements.length !==0){
-            setModalList(item.measurements, HTML.measurementContainer, HTML.measurementList);
-        }
-      })
+    const oItem = store.items.find( ({ id, identification }) => id === itemId && identification === itemIdent );
+    HTML.title.textContent = oItem.title;
+    HTML.collection.textContent = oItem.collection;
+    HTML.identification.textContent = oItem.identification;
+    if(oItem.images && oItem.images.length !== 0){
+        setModalImgs(oItem.images, oItem.title);
+    }
+    if(oItem.descriptions && oItem.descriptions.length !==0){
+        setModalList(oItem.descriptions, HTML.descriptionContainer, HTML.descriptionList);
+    }
+    if(oItem.materials && oItem.materials.length !==0){
+        setModalList(oItem.materials, HTML.materialContainer, HTML.materialList);
+    }
+    if(oItem.measurements && oItem.measurements.length !==0){
+        setModalList(oItem.measurements, HTML.measurementContainer, HTML.measurementList);
+    }
   })
 
 function setModalImgs(images, title){
@@ -169,7 +167,7 @@ function setModalImgs(images, title){
     HTML.imgContainer.innerHTML = "";
     images.forEach(img => {
         const clone = HTML.imgTemplate.cloneNode(true).content;
-        clone.querySelector("img").src =`https://frontend.natmus.dk/api/Image?id=${img}`;
+        clone.querySelector("img").src =`${apiBase}Image?id=${img}`;
         clone.querySelector("img").alt = buildAltTxt(title); // buildAltTxt() defined at helper.js
         if(img === images[0]){
             clone.querySelector(".carousel-item").classList.add("active");
