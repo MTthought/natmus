@@ -19,14 +19,16 @@ function domSelectors(){
     // list of items
     HTML.itemTemplate = document.querySelector(".templates");
     HTML.dataList = document.querySelector("#dataList");
-    // error and load more
+    // error and load
     HTML.errorMsg = document.querySelector("body > div.container > div.text-danger");
+    HTML.spinner = document.querySelector("body > div.container > div.text-center > div")
     HTML.loadMoreBtn = document.querySelector("body > div.container > button");
     // modal
     HTML.modal = document.querySelector("#infoModal");
-    HTML.title = HTML.modal.querySelector('.modal-title');
-    HTML.collection = HTML.modal.querySelector('.collection');
-    HTML.identification = HTML.modal.querySelector('.identification');
+    HTML.title = HTML.modal.querySelector(".modal-title");
+    HTML.collection = HTML.modal.querySelector(".collection");
+    HTML.identification = HTML.modal.querySelector(".identification");
+    HTML.modalSpinner = HTML.modal.querySelector(".spinner-border");
     HTML.imgTemplate = document.querySelector(".imgTemplate");
     HTML.imgContainer = HTML.modal.querySelector(".carousel-inner");
     HTML.listItemTemplate = document.querySelector(".listItemTemplate");
@@ -54,6 +56,8 @@ function search(){
 
     if(titleBox.value || collectionBox.value || idBox.value){
         let sQuery = `${apiBase}Search?query=`;
+        HTML.spinner.classList.remove("d-none");
+
         HTML.inputBoxes.forEach(inputBox => {
             if(inputBox.value){
                 let input = inputBox.value.trim(); // remove space before and after words
@@ -86,22 +90,46 @@ async function getData(requestUrl){
     const response = await fetch(requestUrl);
     if(response.status === 200){
         store.items = await response.json();
+        // remove error message if new response is ok
+        if(!HTML.errorMsg.classList.contains("d-none")){
+            HTML.errorMsg.classList.add("d-none");
+        }
         showList();
     }else{
         HTML.errorMsg.classList.remove("d-none");
+        HTML.spinner.classList.add("d-none");
+    }
+}
+
+// async image loader from https://stackoverflow.com/questions/15999760/load-image-asynchronous
+function loadImg(container, id, spinner, alt){
+    const img = new Image();
+    img.onload = function(){
+        container.appendChild(img);
+        spinner.classList.add("d-none");
+    }
+    img.src = `${apiBase}Image?id=${id}`;
+    img.alt = buildAltTxt(alt); // buildAltTxt() defined at helper.js
+
+    if(container.classList.contains("carousel-item")){
+        img.classList.add("d-block", "w-100");
+    }else if(container.classList.contains("img-container")){
+        img.classList.add("card-img-top");
     }
 }
 
 // display data
 function showList(){
+    HTML.spinner.classList.add("d-none");
     // build items from HTML template
     HTML.dataList.innerHTML = "";
     store.items.forEach(item => {
         const clone = HTML.itemTemplate.cloneNode(true).content;
         if(item.images && item.images.length !== 0){
-            const img = clone.querySelector("img");
-            img.src = `${apiBase}Image?id=${item.images[0]}`;
-            img.alt = buildAltTxt(item.title); // buildAltTxt() defined at helper.js
+            const container = clone.querySelector(".img-container");
+            const spinner = clone.querySelector(".spinner-border");
+            spinner.classList.remove("d-none");
+            loadImg(container, item.images[0], spinner, item.title);
         }
         clone.querySelector(".card-title").textContent = item.title;
         clone.querySelector(".card-subtitle").textContent = item.identification;
@@ -118,10 +146,7 @@ function showList(){
         }
         HTML.dataList.appendChild(clone);
     })
-    // remove error message if new response is ok
-    if(!HTML.errorMsg.classList.contains("d-none")){
-        HTML.errorMsg.classList.add("d-none");
-    }
+
     // show load more button if all search results are not on display
     if(store.items.length === store.searchSize){
         HTML.loadMoreBtn.classList.remove("d-none");
@@ -142,7 +167,7 @@ function loadMore(){
 $('#infoModal').on('show.bs.modal', function (event) {
     const button = $(event.relatedTarget); // Button that triggered the modal
     const itemId = button.data('id'); // Extract info from data-* attributes
-    const itemIdent = button.data('identification');
+    const itemIdent = button.data('identification').toString();
     // Update the modal's content
     const oItem = store.items.find( ({ id, identification }) => id === itemId && identification === itemIdent );
     HTML.title.textContent = oItem.title;
@@ -166,9 +191,9 @@ function setModalImgs(images, title){
     // build carousel items from HTML template
     HTML.imgContainer.innerHTML = "";
     images.forEach(img => {
+        HTML.modalSpinner.classList.remove("d-none");
         const clone = HTML.imgTemplate.cloneNode(true).content;
-        clone.querySelector("img").src =`${apiBase}Image?id=${img}`;
-        clone.querySelector("img").alt = buildAltTxt(title); // buildAltTxt() defined at helper.js
+        loadImg(clone.querySelector(".carousel-item"), img, HTML.modalSpinner, title);
         if(img === images[0]){
             clone.querySelector(".carousel-item").classList.add("active");
         }

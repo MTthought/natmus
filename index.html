@@ -23,8 +23,13 @@
             </div>
         </form>
 
-        <!-- Error -->
+        <!-- Error and loader-->
         <div class="text-danger pb-4 d-none">Invalid search. Try again.</div>
+        <div class="text-center">
+            <div class="spinner-border m-5 d-none" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
 
         <!-- List of items -->
         <div id="dataList" class="row"></div>
@@ -57,6 +62,11 @@
                 </div>
 
                 <div id="carouselControls" class="carousel slide" data-ride="carousel">
+                    <div class="text-center">
+                        <div class="spinner-border m-5 text-primary d-none" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
                     <div class="carousel-inner"></div>
                     <a class="carousel-control-prev" href="#carouselControls" role="button" data-slide="prev">
                       <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -79,7 +89,11 @@
     <template class="templates">
         <div class="col-md-4 col-lg-3 pb-4">
             <div class="card">
-                <img src="" class="card-img-top" alt="">
+                <div class="img-container text-center">
+                    <div class="spinner-border m-5 text-primary d-none" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
                 <div class="card-body">
                   <h5 class="card-title"></h5>
                   <h6 class="card-subtitle mb-2 text-muted"></h6>
@@ -98,7 +112,7 @@
     <!-- Modal image template -->
     <template class="imgTemplate">
         <div class="carousel-item mt-3">
-            <img src="" class="d-block w-100" alt="">
+            <!-- <img src="" class="d-block w-100" alt=""> -->
         </div>
     </template>
 
