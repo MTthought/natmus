@@ -28,7 +28,6 @@ function domSelectors(){
     HTML.title = HTML.modal.querySelector(".modal-title");
     HTML.collection = HTML.modal.querySelector(".collection");
     HTML.identification = HTML.modal.querySelector(".identification");
-    HTML.modalSpinner = HTML.modal.querySelector(".spinner-border");
     HTML.imgTemplate = document.querySelector(".imgTemplate");
     HTML.imgContainer = HTML.modal.querySelector(".carousel-inner");
     HTML.listItemTemplate = document.querySelector(".listItemTemplate");
@@ -191,11 +190,11 @@ function setModalImgs(images, title){
     // build carousel items from HTML template
     HTML.imgContainer.innerHTML = "";
     images.forEach(img => {
-        HTML.modalSpinner.classList.remove("d-none");
         const clone = HTML.imgTemplate.cloneNode(true).content;
-        loadImg(clone.querySelector(".carousel-item"), img, HTML.modalSpinner, title);
+        const container = clone.querySelector(".carousel-item");
+        loadImg(container, img, clone.querySelector(".spinner-border"), title);
         if(img === images[0]){
-            clone.querySelector(".carousel-item").classList.add("active");
+            container.classList.add("active");
         }
         HTML.imgContainer.appendChild(clone);
     })
