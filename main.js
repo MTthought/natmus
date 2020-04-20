@@ -94,40 +94,40 @@ async function getData(requestUrl){
 
 // display data
 function showList(){
-        // build items from HTML template
-        HTML.dataList.innerHTML = "";
-        store.items.forEach(item => {
-            const clone = HTML.itemTemplate.cloneNode(true).content;
-            if(item.images && item.images.length !== 0){
-                const img = clone.querySelector("img");
-                img.src = `${apiBase}Image?id=${item.images[0]}`;
-                img.alt = buildAltTxt(item.title); // buildAltTxt() defined at helper.js
-            }
-            clone.querySelector(".card-title").textContent = item.title;
-            clone.querySelector(".card-subtitle").textContent = item.identification;
-            clone.querySelector(".collection").textContent = item.collection;
-            // show button if item has descriptions, materials, measurements or more than 1 image
-            if(item.descriptions && item.descriptions.length !== 0 
-            || item.materials && item.materials.length !== 0 
-            || item.measurements && item.measurements.length !== 0
-            || item.images && item.images.length > 1){
-                const btn = clone.querySelector(".btn");
-                btn.dataset.id = item.id;
-                btn.dataset.identification = item.identification;
-                btn.classList.remove("d-none");
-            }
-            HTML.dataList.appendChild(clone);
-        })
-        // remove error message if new response is ok
-        if(!HTML.errorMsg.classList.contains("d-none")){
-            HTML.errorMsg.classList.add("d-none");
+    // build items from HTML template
+    HTML.dataList.innerHTML = "";
+    store.items.forEach(item => {
+        const clone = HTML.itemTemplate.cloneNode(true).content;
+        if(item.images && item.images.length !== 0){
+            const img = clone.querySelector("img");
+            img.src = `${apiBase}Image?id=${item.images[0]}`;
+            img.alt = buildAltTxt(item.title); // buildAltTxt() defined at helper.js
         }
-        // show load more button if all search results are not on display
-        if(store.items.length === store.searchSize){
-            HTML.loadMoreBtn.classList.remove("d-none");
-        }else{
-            HTML.loadMoreBtn.classList.add("d-none");
+        clone.querySelector(".card-title").textContent = item.title;
+        clone.querySelector(".card-subtitle").textContent = item.identification;
+        clone.querySelector(".collection").textContent = item.collection;
+        // show button if item has descriptions, materials, measurements or more than 1 image
+        if(item.descriptions && item.descriptions.length !== 0 
+        || item.materials && item.materials.length !== 0 
+        || item.measurements && item.measurements.length !== 0
+        || item.images && item.images.length > 1){
+            const btn = clone.querySelector(".btn");
+            btn.dataset.id = item.id;
+            btn.dataset.identification = item.identification;
+            btn.classList.remove("d-none");
         }
+        HTML.dataList.appendChild(clone);
+    })
+    // remove error message if new response is ok
+    if(!HTML.errorMsg.classList.contains("d-none")){
+        HTML.errorMsg.classList.add("d-none");
+    }
+    // show load more button if all search results are not on display
+    if(store.items.length === store.searchSize){
+        HTML.loadMoreBtn.classList.remove("d-none");
+    }else{
+        HTML.loadMoreBtn.classList.add("d-none");
+    }
 }
 
 // add 12 to searchSize in store
