@@ -31,7 +31,7 @@ export function buildQuery(input, field){
     return sQuery;
 }
 
-// helper function for showList() and setModalImgs()
+// helper function for loadImg()
 export function buildAltTxt(title){
     if(title){
         return title.toLowerCase();
